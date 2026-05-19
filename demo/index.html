@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scroll-magic-lite — Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --card: #16161e;
+      --border: #2a2a35;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e8e8f0;
+      --muted: #888899;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .logo { font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
+    nav a {
+      color: var(--muted); text-decoration: none; font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+    nav .links { display: flex; gap: 24px; align-items: center; }
+    nav .btn-nav {
+      background: var(--accent); color: #fff; padding: 8px 18px;
+      border-radius: 8px; font-size: 0.875rem; font-weight: 600;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(108,99,255,0.15) 0%, transparent 70%);
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3);
+      color: #a89fff; padding: 6px 14px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 500; margin-bottom: 28px;
+    }
+    .badge .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-weight: 800; line-height: 1.08; letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 30%, #a89fff 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 520px; color: var(--muted); font-size: 1.125rem; margin-bottom: 40px;
+    }
+
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      padding: 14px 28px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; border: none; transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      box-shadow: 0 0 30px rgba(108,99,255,0.4);
+    }
+    .btn-primary:hover { box-shadow: 0 0 40px rgba(108,99,255,0.6); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .stats {
+      display: flex; gap: 48px; margin-top: 72px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .stat { text-align: center; }
+    .stat .num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat .label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+    /* SECTIONS */
+    section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 16px;
+    }
+    .section-sub { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin-bottom: 64px; }
+
+    /* CARDS GRID */
+    .grid { display: grid; gap: 20px; }
+    .grid-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px rgba(108,99,255,0.1);
+    }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 20px;
+      background: rgba(108,99,255,0.12);
+    }
+    .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+    /* ANIMATIONS SHOWCASE */
+    .anim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .anim-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 16px; text-align: center;
+      cursor: pointer; transition: border-color 0.3s;
+    }
+    .anim-box:hover { border-color: var(--accent); }
+    .anim-box .anim-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+    .anim-box .anim-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .anim-box .anim-sub { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+    /* CODE BLOCK */
+    .code-tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 10px 20px; font-size: 0.8rem; font-weight: 600;
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s; margin-bottom: -1px;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .code-wrap {
+      background: #0d0d14; border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden;
+    }
+    pre {
+      padding: 28px; overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem; line-height: 1.7; color: #c9d1d9;
+    }
+    .kw { color: #ff7b72; }
+    .fn { color: #d2a8ff; }
+    .str { color: #a5d6ff; }
+    .cm { color: #8b949e; font-style: italic; }
+    .tag { color: #7ee787; }
+    .attr { color: #ffa657; }
+    .val { color: #a5d6ff; }
+
+    /* COMPARE TABLE */
+    .compare {
+      width: 100%; border-collapse: collapse; font-size: 0.875rem;
+    }
+    .compare th, .compare td {
+      padding: 14px 20px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .compare th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .compare tr:last-child td { border-bottom: none; }
+    .compare .highlight { background: rgba(108,99,255,0.06); }
+    .compare .highlight td:first-child { font-weight: 700; color: var(--accent); }
+    .check { color: #3fb950; font-size: 1rem; }
+    .cross { color: #f85149; font-size: 1rem; }
+    .partial { color: #f0883e; font-size: 1rem; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border); padding: 48px 24px;
+      text-align: center; color: var(--muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* DIVIDER */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* NUMBER BLOCKS */
+    .steps { display: flex; flex-direction: column; gap: 32px; }
+    .step { display: flex; gap: 20px; align-items: flex-start; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: var(--accent); flex-shrink: 0; font-size: 0.9rem;
+    }
+    .step-body h4 { font-weight: 700; margin-bottom: 4px; }
+    .step-body p { color: var(--muted); font-size: 0.9rem; }
+
+    code {
+      font-family: 'Fira Code', Consolas, monospace;
+      background: rgba(108,99,255,0.12); padding: 2px 7px;
+      border-radius: 5px; font-size: 0.85em; color: #a89fff;
+    }
+
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">scroll-magic-lite</span>
+  <div class="links">
+    <a href="#features">Features</a>
+    <a href="#animations">Animations</a>
+    <a href="#usage">Usage</a>
+    <a href="https://github.com/Mehulbirare/scroll-magic-light" class="btn-nav btn">GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge"><span class="dot"></span> v0.1.0 — Now on npm</div>
+
+  <h1 data-sml="fadeUp" data-sml-duration="900">
+    Scroll animations<br>that actually feel good.
+  </h1>
+
+  <p data-sml="fadeUp" data-sml-delay="150">
+    IntersectionObserver based. Zero scroll listeners. Zero jank.
+    Works with React, Next.js, or just a <code>&lt;script&gt;</code> tag.
+  </p>
+
+  <div class="hero-btns" data-sml="fadeUp" data-sml-delay="250">
+    <a href="#usage" class="btn btn-primary">Get Started</a>
+    <a href="https://github.com/Mehulbirare/scroll-magic-light" class="btn btn-ghost">View on GitHub →</a>
+  </div>
+
+  <div class="stats" data-sml="fadeUp" data-sml-delay="350">
+    <div class="stat">
+      <div class="num">~3KB</div>
+      <div class="label">gzipped</div>
+    </div>
+    <div class="stat">
+      <div class="num">0</div>
+      <div class="label">scroll listeners</div>
+    </div>
+    <div class="stat">
+      <div class="num">11</div>
+      <div class="label">animation presets</div>
+    </div>
+    <div class="stat">
+      <div class="num">100%</div>
+      <div class="label">TypeScript</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-label">Why scroll-magic-lite</p>
+  <h2 data-sml="fadeUp">Built for performance.</h2>
+  <p class="section-sub" data-sml="fadeUp" data-sml-delay="100">
+    Every technical decision was made to keep animations butter-smooth on any device.
+  </p>
+
+  <div class="grid grid-3">
+    <div class="card" data-sml="fadeUp" data-sml-delay="0">
+      <div class="card-icon">⚡</div>
+      <h3>No scroll listeners</h3>
+      <p>Uses the browser's native <code>IntersectionObserver</code>. No <code>scroll</code> events firing 60× per second.</p>
+    </div>
+    <div class="card" data-sml="fadeUp" data-sml-delay="80">
+      <div class="card-icon">🎯</div>
+      <h3>GPU-only animations</h3>
+      <p>Only <code>transform</code> and <code>opacity</code> are animated — the two properties that never trigger layout or paint.</p>
+    </div>
+    <div class="card" data-sml="fadeUp" data-sml-delay="160">
+      <div class="card-icon">♻️</div>
+      <h3>Shared observer pool</h3>
+      <p>All elements with the same threshold share one <code>IntersectionObserver</code> instance. 1 element or 1000 — same overhead.</p>
+    </div>
+    <div class="card" data-sml="fadeUp" data-sml-delay="0">
+      <div class="card-icon">🌐</div>
+      <h3>Next.js / SSR safe</h3>
+      <p>Every browser API call is guarded. No <code>window is not defined</code> errors in server components.</p>
+    </div>
+    <div class="card" data-sml="fadeUp" data-sml-delay="80">
+      <div class="card-icon">🏷️</div>
+      <h3>Data-attribute API</h3>
+      <p>Add <code>data-sml="fadeUp"</code> to any HTML element. No JS required. Works with any framework or plain HTML.</p>
+    </div>
+    <div class="card" data-sml="fadeUp" data-sml-delay="160">
+      <div class="card-icon">📦</div>
+      <h3>Tree-shakeable ESM</h3>
+      <p>Full ESM + CJS dual build. Import only what you use — bundlers will drop everything else.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ANIMATIONS -->
+<section id="animations">
+  <p class="section-label">Animation presets</p>
+  <h2 data-sml="fadeUp">11 animations out of the box.</h2>
+  <p class="section-sub" data-sml="fadeUp" data-sml-delay="100">
+    Scroll down to see each one trigger live.
+  </p>
+
+  <div class="anim-grid">
+    <div class="anim-box" data-sml="fadeIn"><span class="anim-icon">✨</span><div class="anim-name">fadeIn</div><div class="anim-sub">opacity only</div></div>
+    <div class="anim-box" data-sml="fadeUp"><span class="anim-icon">⬆️</span><div class="anim-name">fadeUp</div><div class="anim-sub">fade + slide up</div></div>
+    <div class="anim-box" data-sml="fadeDown"><span class="anim-icon">⬇️</span><div class="anim-name">fadeDown</div><div class="anim-sub">fade + slide down</div></div>
+    <div class="anim-box" data-sml="fadeLeft"><span class="anim-icon">⬅️</span><div class="anim-name">fadeLeft</div><div class="anim-sub">fade + slide left</div></div>
+    <div class="anim-box" data-sml="fadeRight"><span class="anim-icon">➡️</span><div class="anim-name">fadeRight</div><div class="anim-sub">fade + slide right</div></div>
+    <div class="anim-box" data-sml="zoomIn"><span class="anim-icon">🔍</span><div class="anim-name">zoomIn</div><div class="anim-sub">scale 85% → 100%</div></div>
+    <div class="anim-box" data-sml="zoomOut"><span class="anim-icon">🔎</span><div class="anim-name">zoomOut</div><div class="anim-sub">scale 115% → 100%</div></div>
+    <div class="anim-box" data-sml="slideUp"><span class="anim-icon">📤</span><div class="anim-name">slideUp</div><div class="anim-sub">translate only</div></div>
+    <div class="anim-box" data-sml="slideDown"><span class="anim-icon">📥</span><div class="anim-name">slideDown</div><div class="anim-sub">translate only</div></div>
+    <div class="anim-box" data-sml="flipX"><span class="anim-icon">🔄</span><div class="anim-name">flipX</div><div class="anim-sub">3D rotate X axis</div></div>
+    <div class="anim-box" data-sml="flipY"><span class="anim-icon">🔃</span><div class="anim-name">flipY</div><div class="anim-sub">3D rotate Y axis</div></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- USAGE -->
+<section id="usage">
+  <p class="section-label">Get started</p>
+  <h2 data-sml="fadeUp">3 ways to use it.</h2>
+  <p class="section-sub" data-sml="fadeUp" data-sml-delay="100">
+    Pick the integration that fits your stack.
+  </p>
+
+  <div class="code-wrap" data-sml="fadeUp" data-sml-delay="150">
+    <div class="code-tabs">
+      <button class="tab active" onclick="showTab('html')">HTML / CDN</button>
+      <button class="tab" onclick="showTab('react')">React / Next.js</button>
+      <button class="tab" onclick="showTab('vanilla')">Vanilla JS</button>
+    </div>
+
+    <div id="tab-html" class="code-panel active">
+<pre><span class="cm">&lt;!-- 1. Add the script --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="val">"https://unpkg.com/scroll-magic-lite/dist/scroll-magic-lite.global.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- 2. Add data-sml to any element --&gt;</span>
+<span class="tag">&lt;h1</span> <span class="attr">data-sml</span>=<span class="val">"fadeUp"</span><span class="tag">&gt;</span>Hello world<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">data-sml</span>=<span class="val">"fadeUp"</span> <span class="attr">data-sml-delay</span>=<span class="val">"150"</span><span class="tag">&gt;</span>Subtitle<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">data-sml</span>=<span class="val">"zoomIn"</span> <span class="attr">data-sml-duration</span>=<span class="val">"800"</span><span class="tag">&gt;</span>Card<span class="tag">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- That's it. Auto-initializes on DOMContentLoaded. --&gt;</span></pre>
+    </div>
+
+    <div id="tab-react" class="code-panel">
+<pre><span class="cm">// npm install scroll-magic-lite</span>
+<span class="kw">import</span> { <span class="fn">useScrollReveal</span> } <span class="kw">from</span> <span class="str">'scroll-magic-lite/react'</span>
+
+<span class="kw">export default function</span> <span class="fn">Hero</span>() {
+  <span class="kw">const</span> titleRef = <span class="fn">useScrollReveal</span>({ animation: <span class="str">'fadeUp'</span>, duration: <span class="str">700</span> })
+  <span class="kw">const</span> textRef  = <span class="fn">useScrollReveal</span>({ animation: <span class="str">'fadeUp'</span>, delay: <span class="str">150</span> })
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">section</span>&gt;
+      &lt;<span class="tag">h1</span> ref={titleRef}&gt;Hello world&lt;/<span class="tag">h1</span>&gt;
+      &lt;<span class="tag">p</span>  ref={textRef}&gt;Subtitle text&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">section</span>&gt;
+  )
+}</pre>
+    </div>
+
+    <div id="tab-vanilla" class="code-panel">
+<pre><span class="cm">// npm install scroll-magic-lite</span>
+<span class="kw">import</span> { <span class="fn">ScrollMagicLite</span> } <span class="kw">from</span> <span class="str">'scroll-magic-lite'</span>
+
+<span class="kw">const</span> sml = <span class="kw">new</span> <span class="fn">ScrollMagicLite</span>()
+
+<span class="cm">// CSS selector — auto-staggers multiple matches</span>
+sml.<span class="fn">reveal</span>(<span class="str">'.hero-title'</span>, { animation: <span class="str">'fadeUp'</span> })
+sml.<span class="fn">reveal</span>(<span class="str">'.card'</span>,       { animation: <span class="str">'zoomIn'</span>, duration: <span class="str">500</span> })
+
+<span class="cm">// Clean up (e.g. on route change)</span>
+sml.<span class="fn">destroy</span>()</pre>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- COMPARE -->
+<section>
+  <p class="section-label">Comparison</p>
+  <h2 data-sml="fadeUp">How it stacks up.</h2>
+  <p class="section-sub" data-sml="fadeUp" data-sml-delay="100">
+    Against the most popular scroll animation libraries.
+  </p>
+
+  <div class="card" data-sml="fadeUp" data-sml-delay="150" style="padding: 0; overflow: hidden;">
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th style="color: var(--accent)">scroll-magic-lite</th>
+          <th>AOS</th>
+          <th>ScrollReveal</th>
+          <th>GSAP ScrollTrigger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td>No scroll listeners</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Next.js / SSR safe</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="partial">~</span></td>
+          <td><span class="partial">~</span></td>
+          <td><span class="partial">~</span></td>
+        </tr>
+        <tr class="highlight">
+          <td>React hooks</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Data-attribute API</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr class="highlight">
+          <td>CDN / script tag</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>TypeScript native</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="partial">~</span></td>
+          <td><span class="partial">~</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr class="highlight">
+          <td>Bundle size (gzip)</td>
+          <td><strong style="color: #3fb950">~3 KB</strong></td>
+          <td>~14 KB</td>
+          <td>~6 KB</td>
+          <td>~67 KB</td>
+        </tr>
+        <tr>
+          <td>Free license</td>
+          <td><span class="check">✓ MIT</span></td>
+          <td><span class="check">✓ MIT</span></td>
+          <td><span class="check">✓ MIT</span></td>
+          <td><span class="cross">✗ Paid</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <p>Built with care. Released under MIT. <a href="https://github.com/Mehulbirare/scroll-magic-light">GitHub</a> · <a href="https://www.npmjs.com/package/scroll-magic-lite">npm</a></p>
+</footer>
+
+<script src="../dist/scroll-magic-lite.global.js"></script>
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+    document.getElementById('tab-' + name).classList.add('active')
+    event.target.classList.add('active')
+  }
+</script>
+</body>
+</html>

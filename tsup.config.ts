@@ -21,4 +21,13 @@ export default defineConfig([
       options.jsx = 'automatic'
     },
   },
+  {
+    entry: { 'scroll-magic-lite': 'src/iife.ts' },
+    format: ['iife'],
+    globalName: 'ScrollMagicLite',
+    outDir: 'dist',
+    minify: true,
+    sourcemap: false,
+    target: 'es2017',
+  },
 ])

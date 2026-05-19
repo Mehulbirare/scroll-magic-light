@@ -1,19 +1,35 @@
 {
   "name": "scroll-magic-lite",
   "version": "0.1.0",
-  "description": "Ultra-smooth scroll animation engine with zero jank. Next.js ready, IntersectionObserver based.",
+  "description": "Ultra-smooth scroll animations. IntersectionObserver based, zero scroll listeners, zero jank. Works with Next.js, React, or plain HTML via data attributes.",
   "keywords": [
     "scroll",
     "animation",
+    "scroll-animation",
     "intersection-observer",
-    "next.js",
-    "react",
     "reveal",
-    "performance"
+    "scroll-reveal",
+    "aos",
+    "animate-on-scroll",
+    "next.js",
+    "nextjs",
+    "react",
+    "performance",
+    "smooth",
+    "lazy-animation",
+    "viewport",
+    "fade",
+    "framer-motion",
+    "gsap",
+    "scrolltrigger",
+    "web-animation",
+    "zero-jank"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/scroll-magic-lite.global.js",
+  "jsdelivr": "./dist/scroll-magic-lite.global.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -27,7 +43,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -36,6 +53,14 @@
     "prepublishOnly": "npm run build"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mehulbirare/scroll-magic-light.git"
+  },
+  "homepage": "https://github.com/Mehulbirare/scroll-magic-light#readme",
+  "bugs": {
+    "url": "https://github.com/Mehulbirare/scroll-magic-light/issues"
+  },
   "devDependencies": {
     "@types/react": "^18.3.0",
     "tsup": "^8.0.0",
