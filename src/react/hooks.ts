@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState, createRef } from 'react'
 import { getAnimationStyles, applyStyles } from '../animations'
 import { observe } from '../observer'
 import type { AnimationConfig, ResolvedConfig } from '../types'
@@ -70,8 +70,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   trigger: () => void
 } {
   const ref = useRef<T>(null)
-  const isVisibleRef = useRef(false)
-  const forceUpdate = useRef<() => void>(() => {})
+  const [isVisible, setIsVisible] = useState(false)
   const cfg = resolve(config)
 
   const trigger = useCallback(() => {
@@ -79,6 +78,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     if (!el) return
     const { visible } = getAnimationStyles(cfg.animation, cfg.distance)
     applyStyles(el, visible)
+    setIsVisible(true)
   }, [cfg.animation, cfg.distance])
 
   useEffect(() => {
@@ -96,16 +96,14 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
       (entry) => {
         if (entry.isIntersecting) {
           applyStyles(el, visible)
-          isVisibleRef.current = true
-          forceUpdate.current()
+          setIsVisible(true)
           setTimeout(() => {
             el.style.willChange = 'auto'
           }, cfg.duration + cfg.delay)
           if (cfg.once) cleanup()
         } else if (!cfg.once) {
           applyStyles(el, hidden)
-          isVisibleRef.current = false
-          forceUpdate.current()
+          setIsVisible(false)
         }
       },
       cfg.threshold,
@@ -115,7 +113,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     return cleanup
   }, [])
 
-  return { ref, isVisible: isVisibleRef.current, trigger }
+  return { ref, isVisible, trigger }
 }
 
 export function useScrollRevealGroup<T extends HTMLElement = HTMLDivElement>(
@@ -123,7 +121,15 @@ export function useScrollRevealGroup<T extends HTMLElement = HTMLDivElement>(
   config: AnimationConfig = {},
   stagger: number = 80
 ): React.RefObject<T>[] {
-  const refs = Array.from({ length: count }, () => useRef<T>(null))
+  // Hold all refs in a single ref so we never call useRef in a loop (which
+  // would break the Rules of Hooks when `count` changes between renders).
+  const refsRef = useRef<React.RefObject<T>[]>([])
+  if (refsRef.current.length !== count) {
+    const next = refsRef.current.slice(0, count)
+    while (next.length < count) next.push(createRef<T>())
+    refsRef.current = next
+  }
+  const refs = refsRef.current
   const cfg = resolve(config)
 
   useEffect(() => {

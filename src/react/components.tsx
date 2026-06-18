@@ -30,6 +30,23 @@ interface ScrollRevealListProps extends AnimationConfig {
   stagger?: number
 }
 
+// Each list item is its own component, so useScrollReveal is called once at the
+// top level of a component (not inside a loop) — keeping the Rules of Hooks intact.
+function ScrollRevealItem({
+  as: Item,
+  className,
+  config,
+  children,
+}: {
+  as: keyof HTMLElementTagNameMap
+  className?: string
+  config: AnimationConfig
+  children: React.ReactNode
+}) {
+  const ref = useScrollReveal<HTMLElement>(config)
+  return React.createElement(Item, { ref, className }, children)
+}
+
 export function ScrollRevealList({
   children,
   as: Wrapper = 'div',
@@ -43,14 +60,14 @@ export function ScrollRevealList({
   return React.createElement(
     Wrapper,
     { className },
-    React.Children.map(children, (child, i) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const itemRef = useScrollReveal<HTMLElement>({
-        ...config,
-        delay: (delay as number) + i * stagger,
+    React.Children.map(children, (child, i) =>
+      React.createElement(ScrollRevealItem, {
+        key: i,
+        as: Item,
+        className: itemClassName,
+        config: { ...config, delay: (delay as number) + i * stagger },
+        children: child,
       })
-
-      return React.createElement(Item, { ref: itemRef, className: itemClassName }, child)
-    })
+    )
   )
 }

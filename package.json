@@ -1,6 +1,6 @@
 {
   "name": "scroll-magic-lite",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Ultra-smooth scroll animations. IntersectionObserver based, zero scroll listeners, zero jank. Works with Next.js, React, or plain HTML via data attributes.",
   "keywords": [
     "scroll",
